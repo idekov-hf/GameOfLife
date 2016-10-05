@@ -1,7 +1,7 @@
 var table;
 var grid = [];
-var rows = 6;
-var cols = 6;
+var rows = 12;
+var cols = 12;
 var isPlaying = false;
 var timer;
 
@@ -11,12 +11,30 @@ $(document).ready(function() {
   $('td').click(function() {
     cellClicked(this);
   });
+  isMouseDown = false;
+
+  $('td').mousedown(function() {
+    isMouseDown = true;
+    console.log(isMouseDown);
+  })
+  .mouseup(function() {
+    isMouseDown = false;
+  });
+
+  $('td').mouseenter(function() {
+    if (isMouseDown) {
+      cellClicked(this);
+    }
+  });
+
   $('#advance-button').click(function() {
     advanceGrid();
   });
+
   $('#start-button').click(function() {
     start();
   });
+
   $('#reset-button').click(function() {
     resetGrid();
   });
@@ -113,11 +131,13 @@ function countNeighbors(row, col) {
 
 function start() {
   if (!isPlaying) {
-    timer = setInterval(advanceGrid, 500);
+    timer = setInterval(advanceGrid, 250);
     isPlaying = true;
+    // $('#start-button').css('background-color', 'green');
   } else {
     clearInterval(timer);
     isPlaying = false;
+    // $('#start-button').css('background-color', 'transparent');
   }
 }
 
