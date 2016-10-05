@@ -2,6 +2,8 @@ var table;
 var grid = [];
 var rows = 6;
 var cols = 6;
+var isPlaying = false;
+var timer;
 
 $(document).ready(function() {
   table = document.getElementById('myTable');
@@ -9,8 +11,11 @@ $(document).ready(function() {
   $('td').click(function() {
     cellClicked(this);
   });
-  $('#start-button').click(function() {
+  $('#advance-button').click(function() {
     advanceGrid();
+  });
+  $('#start-button').click(function() {
+    start();
   });
   $('#reset-button').click(function() {
     resetGrid();
@@ -47,8 +52,6 @@ function cellClicked(cell) {
   var row = $tr.index();
   var clickedCell = grid[row][col]
   grid[row][col] = clickedCell ? 0 : 1;
-  logGrid();
-  // console.log('neighbors: ' + countNeighbors(row, col));
 }
 
 function advanceGrid() {
@@ -64,17 +67,14 @@ function advanceGrid() {
 
       if (cellIsAlive) {
         if (numNeighbors < 2 || numNeighbors > 3) {
-          // newGrid[row][col] = 0;
           newGrid[row].push(0);
           table.rows[row].cells[col].className = '';
         } else {
-          // newGrid[row][col] = 1;
           newGrid[row].push(1);
           table.rows[row].cells[col].className = 'filled';
         }
       } else {
         if (numNeighbors === 3) {
-          // newGrid[row][col] = 1;
           newGrid[row].push(1);
           table.rows[row].cells[col].className = 'filled';
         } else {
@@ -109,6 +109,16 @@ function countNeighbors(row, col) {
   neighbors -= grid[row][col];
 
   return neighbors;
+}
+
+function start() {
+  if (!isPlaying) {
+    timer = setInterval(advanceGrid, 500);
+    isPlaying = true;
+  } else {
+    clearInterval(timer);
+    isPlaying = false;
+  }
 }
 
 function resetGrid() {
