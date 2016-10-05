@@ -133,11 +133,19 @@ function start() {
   if (!isPlaying) {
     timer = setInterval(advanceGrid, 250);
     isPlaying = true;
+<<<<<<< HEAD
     $('#start-button').css('background-color', 'green');
   } else {
     clearInterval(timer);
     isPlaying = false;
     $('#start-button').css('background-color', 'transparent');
+=======
+    // $('#start-button').css('background-color', 'green');
+  } else {
+    clearInterval(timer);
+    isPlaying = false;
+    // $('#start-button').css('background-color', 'transparent');
+>>>>>>> 1a0ade5dfbec510f52fc663e93b660181e1401c1
   }
 }
 
