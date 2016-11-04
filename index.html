@@ -10,9 +10,18 @@
 
 	<h1 class="text-primary">This will be my Game of Life!</h1>
 	<table id='myTable'></table>
-	<button type='button' onclick="handlers.advance()">Advance</button>
-	<button type='button' onclick="handlers.start()">Start/Stop</button>
-	<button type='button' onclick="handlers.reset()">Reset</button>
+
+	<div>
+		<input type="number" id="rowsInput">
+		<input type="number" id="columnsInput">
+		<button type="button" onclick="handlers.create()">Create Grid</button>
+	</div>
+
+	<div>
+		<button type='button' onclick="handlers.advance()">Advance</button>
+		<button type='button' onclick="handlers.start()">Start/Stop</button>
+		<button type='button' onclick="handlers.reset()">Reset</button>
+	</div>
 
 </body>
 </html> 
