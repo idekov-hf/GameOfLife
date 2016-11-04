@@ -3,25 +3,27 @@
 <head>
 	<title>Game of Life</title>
 	<!-- <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js'></script> -->
-	<script src='script.js'></script>
+	
 	<link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
 
 	<h1 class="text-primary">This will be my Game of Life!</h1>
-	<table id='myTable'></table>
+
+	<table id='grid'></table>
 
 	<div>
-		<input type="number" id="rowsInput">
-		<input type="number" id="columnsInput">
-		<button type="button" onclick="handlers.create()">Create Grid</button>
+		Rows: <input type="number" id="rowsInput">
+		Columns: <input type="number" id="columnsInput">
+		<button type="button" onclick="controller.create()">Create Grid</button>
 	</div>
 
 	<div>
-		<button type='button' onclick="handlers.advance()">Advance</button>
-		<button type='button' onclick="handlers.start()">Start/Stop</button>
-		<button type='button' onclick="handlers.reset()">Reset</button>
+		<button type='button' onclick="controller.advance()">Advance</button>
+		<button type='button' onclick="controller.start()">Start/Stop</button>
+		<button type='button' onclick="controller.reset()">Reset</button>
 	</div>
 
+	<script src='new-script.js'></script>
 </body>
 </html> 
