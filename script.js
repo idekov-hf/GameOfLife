@@ -1,151 +1,163 @@
-var table;
-var grid = [];
-var rows = 12;
-var cols = 12;
-var isPlaying = false;
-var timer;
+var grid = {
+	array: [],
+	rows: 0,
+	columns: 0,
+	isInitialized: false,
+	create: function(rows, columns) {
+		this.array = [];
+		this.rows = rows;
+		this.columns = columns;
+		for (var row = 0; row < rows; row++) {
+			this.array[row] = [];
+			for (var column = 0; column < columns; column++) {
+				this.array[row][column] = {
+					isAlive: false,
+					numAliveNeighbors: 0
+				};
+			}
+		}
+		this.isInitialized = true;
+	},
+	countNeighborsForAllCells: function() {
+		this.array.forEach(function(row, rowIndex) {
+			row.forEach(function(cell, columnIndex) {
+				cell.numAliveNeighbors = 0;
+				this.countNeighborsForCellAtPosition(rowIndex, columnIndex);
+			}, this);
+		}, this);
+	},
+	countNeighborsForCellAtPosition: function(row, column) {
+		for (var i = row - 1; i <= row + 1; i++) {
 
-$(document).ready(function() {
-  table = document.getElementById('myTable');
-  createTable();
-  $('td').click(function() {
-    cellClicked(this);
-  });
-  isMouseDown = false;
+			if (i < 0 || i >= this.rows) { continue; }
 
-  $('td').mousedown(function() {
-    isMouseDown = true;
-    console.log(isMouseDown);
-  })
-  .mouseup(function() {
-    isMouseDown = false;
-  });
+			for (var j = column - 1; j <= column + 1; j++) {
 
-  $('td').mouseenter(function() {
-    if (isMouseDown) {
-      cellClicked(this);
-    }
-  });
+				if (j < 0 || j >= this.columns) { continue; }
+				if (i === row && j === column) { continue; }
 
-  $('#advance-button').click(function() {
-    advanceGrid();
-  });
+				if (this.array[i][j].isAlive) {
+					this.array[row][column].numAliveNeighbors++;
+				}
+			}
+		}
+	},
+	updateAllCells: function() {
+		this.array.forEach(function(row) {
+			row.forEach(function(cell) {
+				var numAliveNeighbors = cell.numAliveNeighbors;
+				if (numAliveNeighbors === 3) {
+					cell.isAlive = true;
+				} else if (numAliveNeighbors < 2 || numAliveNeighbors > 3) {
+					cell.isAlive = false;
+				}
+			});
+		});
+	},
+	advance: function() {
+		this.countNeighborsForAllCells();
+		this.updateAllCells();
+	},
+	reset: function() {
+		if (!this.isInitialized) { return; }
+		this.array.forEach(function(row) {
+			row.forEach(function(cell) {
+				cell.isAlive = false;
+				cell.numAliveNeighbors = 0;
+			});
+		});
+	},
+	toggleCellAtPosition: function(row, column) {
+		var cell = this.array[row][column];
+		cell.isAlive = !cell.isAlive;
+	},
+	getCellAtPosition: function(row, column) {
+		return this.array[row][column];
+	},
+	log: function() {
+		var string = "";
+		this.array.forEach(function(row) {
+			string += "|";
+			row.forEach(function(cell) {
+				string += cell.isAlive ? "1|" : "0|";
+			});
+			string += "\n";
+		});
+		console.log(string);
+	}
+};
 
-  $('#start-button').click(function() {
-    start();
-  });
+var controller = {
+	isPlaying: false,
+	timer: undefined,
+	create: function() {
+		var rowsInputValue = document.getElementById("rowsInput").valueAsNumber;
+		var columnsInputValue = document.getElementById("columnsInput").valueAsNumber;
+		grid.create(rowsInputValue, columnsInputValue);
+		view.createTable(rowsInputValue, columnsInputValue);
+	},
+	advance: function() {
+		grid.advance();
+		view.advanceGrid();
+	},
+	start: function() {
+		if (!this.isPlaying) {
+			this.timer = setInterval(this.advance, 250);
+		} else {
+			clearInterval(this.timer);
+		}
+		this.isPlaying = !this.isPlaying;
+	},
+	reset: function() {
+		grid.reset();
+		view.resetTable();
+	},
+	toggleCell: function(td) {
+		var rowNum = parseInt(td.parentNode.id);
+		var columnNum = parseInt(td.id); 
 
-  $('#reset-button').click(function() {
-    resetGrid();
-  });
-});
+		grid.toggleCellAtPosition(rowNum, columnNum);
+		var cell = grid.getCellAtPosition(rowNum, columnNum);
+		td.className = cell.isAlive ? "filled" : "empty"
+	}
+};
 
-function createTable() { 
-  for (var row = 0; row < rows; row++) {
-    grid[row] = [];
-    var tableRow = table.insertRow(row);
-    for (var col = 0; col < cols; col++) {
-      grid[row][col] = 0;
-      var tableCol = tableRow.insertCell(col);
-    }
-  }
-}
+var view = {
+	table: document.getElementById("grid"),
+	createTable: function(rows, columns) {
+		this.table.innerHTML = "";
+		for (var row = 0; row < rows; row++) {
+			var tr = this.table.insertRow(row);
+			tr.id = row;
+			for (var column = 0; column < columns; column++) {
+				var td = tr.insertCell(column);
+				td.id = column;
+			}
+		}
+	},
+	resetTable: function() {
+		for (row = 0; row < this.table.rows.length; row++) {
+			var tr = this.table.rows[row];
+			for (column = 0; column < tr.cells.length; column++) {
+				tr.cells[column].className = "empty";
+			}
+		}
+	},
+	advanceGrid: function() {
+		for (row = 0; row < this.table.rows.length; row++) {
+			var tr = this.table.rows[row];
+			for (column = 0; column < tr.cells.length; column++) {
+				tr.cells[column].className = grid.array[row][column].isAlive ? "filled" : "emtpy";
+			}
+		}
+	},
+	setUpEventListeners: function() {
+		var table = document.getElementById("grid");
+		table.addEventListener("mouseup", function(event) {
+			var elementClicked = event.target;
+			controller.toggleCell(elementClicked);
+		});
+	}
+};
 
-function logGrid() {
-  var gridString = '';
-  for (i = 0; i < grid.length; i++) {
-    gridString += '|';
-    for (j = 0; j < grid[0].length; j++) {
-      gridString += grid[i][j] + '|';
-    }
-    gridString += '\n';
-  }
-  console.log(gridString);
-}
-
-function cellClicked(cell) {
-  $(cell).toggleClass('filled');
-  var col = $(cell).index();
-  var $tr = $(cell).closest('tr');
-  var row = $tr.index();
-  var clickedCell = grid[row][col]
-  grid[row][col] = clickedCell ? 0 : 1;
-}
-
-function advanceGrid() {
-
-  var newGrid = [];
-
-  for (row = 0; row < grid.length; row++) {
-    newGrid.push([]);
-    for (col = 0; col < grid[0].length; col++) {
-
-      var numNeighbors = countNeighbors(row, col);
-      var cellIsAlive = grid[row][col];
-
-      if (cellIsAlive) {
-        if (numNeighbors < 2 || numNeighbors > 3) {
-          newGrid[row].push(0);
-          table.rows[row].cells[col].className = '';
-        } else {
-          newGrid[row].push(1);
-          table.rows[row].cells[col].className = 'filled';
-        }
-      } else {
-        if (numNeighbors === 3) {
-          newGrid[row].push(1);
-          table.rows[row].cells[col].className = 'filled';
-        } else {
-          newGrid[row].push(0);
-          table.rows[row].cells[col].className = '';
-        }
-      }
-    }
-  }
-
-  grid = newGrid;
-
-  logGrid();
-}
-
-function countNeighbors(row, col) {
-  var neighbors = 0;
-
-  for (i = row - 1; i < row + 2; i++) {
-    for (j = col - 1; j < col + 2; j++) {
-
-      if (i >= 0 && j >= 0) {
-        if (i < rows && j < cols) {
-          if (grid[i][j] === 1) {
-            neighbors++;
-          }
-        }
-      }
-    }
-  }
-
-  neighbors -= grid[row][col];
-
-  return neighbors;
-}
-
-function start() {
-  if (!isPlaying) {
-    timer = setInterval(advanceGrid, 250);
-    isPlaying = true;
-    $('#start-button').css('background-color', 'green');
-  } else {
-    clearInterval(timer);
-    isPlaying = false;
-    $('#start-button').css('background-color', 'transparent');
-  }
-}
-
-function resetGrid() {
-  for (var row = 0; row < rows; row++) {
-    for (var col = 0; col < cols; col++) {
-      grid[row][col] = 0;
-      table.rows[row].cells[col].className = '';
-    }
-  }
-}
+view.setUpEventListeners();
