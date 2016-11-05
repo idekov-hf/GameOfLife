@@ -36,8 +36,8 @@ var grid = {
 				if (j < 0 || j >= this.columns) { continue; }
 				if (i === row && j === column) { continue; }
 
-				if (array[i][j].isAlive) {
-					array[row][column].numAliveNeighbors++;
+				if (this.array[i][j].isAlive) {
+					this.array[row][column].numAliveNeighbors++;
 				}
 			}
 		}
@@ -98,6 +98,7 @@ var controller = {
 	},
 	advance: function() {
 		grid.advance();
+		view.advanceGrid();
 	},
 	start: function() {
 		if (!this.isPlaying) {
@@ -139,6 +140,14 @@ var view = {
 			var tr = this.table.rows[row];
 			for (column = 0; column < tr.cells.length; column++) {
 				tr.cells[column].className = "empty";
+			}
+		}
+	},
+	advanceGrid: function() {
+		for (row = 0; row < this.table.rows.length; row++) {
+			var tr = this.table.rows[row];
+			for (column = 0; column < tr.cells.length; column++) {
+				tr.cells[column].className = grid.array[row][column].isAlive ? "filled" : "emtpy";
 			}
 		}
 	},
